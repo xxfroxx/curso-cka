@@ -62,21 +62,14 @@ set expandtab       " convierte Tab en espacios
                     " YAML no acepta tabs, falla silenciosamente
 set tabstop=2       " un Tab equivale a 2 espacios
 set shiftwidth=2    " indentacion con >> o << usa 2 espacios
-set autoindent      " nueva linea hereda la indentacion anterior
-                    " evita tener que indentar manualmente
-                    " cada linea en bloques anidados
+
 
 " --- OPCIONAL PERO RECOMENDADO ---
 set number          " muestra numeros de linea
                     " util para identificar la linea exacta
                     " cuando kubectl reporta un error de YAML
 
-set pastetoggle=<F2>  " toggle para activar/desactivar paste mode
-                      " CRITICO: cuando pegas YAML copiado desde
-                      " kubernetes.io, el autoindent duplica la
-                      " indentacion y rompe el manifiesto.
-                      " Pulsa F2 antes de pegar, F2 de nuevo
-                      " al terminar para restaurar autoindent.
+
 EOF
 
 Verificacion de expandtab:
@@ -448,31 +441,73 @@ kubectl exec <nombre-pod> -- env
 kubectl exec <nombre-pod> -- cat /etc/resolv.conf
 kubectl exec <nombre-pod> -- nslookup kubernetes.default
 
-4.4 JSONPATH - EXTRAER CAMPOS ESPECIFICOS
+4.4 EXTRAER CAMPOS ESPECIFICOS
+--------------------------------
+
+Tres herramientas disponibles segun el caso.
+Ninguna es obligatoria memorizarla, todas son
+alternativas para el mismo problema.
+
+HERRAMIENTA 1: custom-columns
+-------------------------------
+
+Util cuando necesitas mostrar campos especificos
+en formato tabla. Mas robusto que awk porque
+referencia campos por nombre, no por posicion.
+
+kubectl get pods -n kube-system \
+  -o custom-columns=\
+NAME:.metadata.name,\
+NODE:.spec.nodeName,\
+IMAGE:.spec.containers[0].image
+
+HERRAMIENTA 2: grep/awk con --no-headers
 ------------------------------------------
 
-El examen a veces pide guardar un valor especifico
-en un fichero. JSONPath es la herramienta correcta.
+Util para filtrar y contar resultados.
 
-Obtener la IP de un pod:
-kubectl get pod mi-pod -o jsonpath='{.status.podIP}'
+  Contar nodos Ready:
+  kubectl get nodes --no-headers | grep -c Ready
 
-Obtener la imagen de un deployment:
-kubectl get deployment mi-app \
-  -o jsonpath='{.spec.template.spec.containers[0].image}'
+  Filtrar pods que no estan Running:
+  kubectl get pods --no-headers | grep -v Running
 
-Obtener todos los nombres de nodos:
-kubectl get nodes \
-  -o jsonpath='{.items[*].metadata.name}'
+HERRAMIENTA 3: jsonpath
+-------------------------
 
-Ejemplo real de examen:
-"Obtener el numero de nodos Ready y guardarlo en /tmp/nodes.txt"
+Util para extraer un valor unico y guardarlo en fichero.
 
-kubectl get nodes \
-  --no-headers \
-  | grep -c " Ready" > /tmp/nodes.txt
+  kubectl get pod mi-pod \
+    -o jsonpath='{.status.podIP}' > /tmp/ip.txt
 
-cat /tmp/nodes.txt
+COMO DESCUBRIR LOS CAMPOS DISPONIBLES:
+----------------------------------------
+
+Sin memorizar nada. Dos comandos en terminal:
+
+  Opcion A - ver el YAML del recurso:
+  kubectl get pod <nombre> -o yaml
+
+  La ruta en custom-columns o jsonpath es el camino
+  de indentacion separado por puntos:
+
+    spec:
+      nodeName: worker-01   ->  .spec.nodeName
+
+    spec:
+      containers:
+      - image: nginx        ->  .spec.containers[0].image
+
+  Opcion B - kubectl explain para navegar la estructura:
+  kubectl explain pod.spec
+  kubectl explain pod.spec.containers
+
+REGLA PARA EL EXAMEN:
+----------------------
+
+  custom-columns  -> mostrar varios campos en tabla
+  grep/awk        -> filtrar y contar
+  jsonpath        -> extraer un valor unico a fichero
 
 --------------------------------------------------
 5. DOCUMENTACION OFICIAL DURANTE EL EXAMEN

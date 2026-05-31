@@ -1,0 +1,125 @@
+COMO DESCUBRIR LOS CAMPOS DISPONIBLES
+=======================================
+
+HERRAMIENTA 1: kubectl get -o yaml
+------------------------------------
+
+El YAML de un recurso existente te muestra la estructura
+completa y exacta de todos los campos disponibles.
+
+  kubectl get pod <nombre> -n kube-system -o yaml
+
+La salida es el mapa completo del recurso. Lo que ves
+en el YAML es exactamente lo que puedes referenciar
+en custom-columns o jsonpath.
+
+Por ejemplo, en la salida veras:
+
+  metadata:
+    name: coredns-xxxx        <- .metadata.name
+    namespace: kube-system    <- .metadata.namespace
+    labels:
+      app: coredns            <- .metadata.labels.app
+  spec:
+    nodeName: mi-nodo         <- .spec.nodeName
+    containers:
+    - name: coredns           <- .spec.containers[0].name
+      image: coredns:1.10     <- .spec.containers[0].image
+  status:
+    podIP: 10.0.0.5           <- .status.podIP
+    phase: Running            <- .status.phase
+
+La ruta en custom-columns o jsonpath es simplemente
+el camino desde la raiz hasta el campo, con punto
+como separador.
+
+HERRAMIENTA 2: kubectl explain
+--------------------------------
+
+Te describe la estructura de cualquier recurso y
+sus campos disponibles, con documentacion incluida.
+
+  kubectl explain pod
+  kubectl explain pod.spec
+  kubectl explain pod.spec.containers
+  kubectl explain pod.metadata
+
+Ejemplo de salida de kubectl explain pod.spec:
+
+  KIND:     Pod
+  VERSION:  v1
+
+  RESOURCE: spec <Object>
+
+  FIELDS:
+    nodeName <string>
+      NodeName is a request to schedule this pod
+      onto a specific node.
+
+    containers <[]Object>
+      List of containers belonging to the pod.
+
+    restartPolicy <string>
+      Restart policy for all containers.
+
+Navegas de lo general a lo especifico:
+
+  kubectl explain pod                    # campos raiz
+  kubectl explain pod.spec               # campos de spec
+  kubectl explain pod.spec.containers    # campos de containers
+
+FLUJO REAL EN EL EXAMEN:
+--------------------------
+
+Si no recuerdas el campo exacto, haces esto:
+
+  Paso 1: obtener el YAML de un recurso existente
+    kubectl get pod <cualquier-pod> -o yaml | head -50
+
+  Paso 2: identificar visualmente el campo que necesitas
+
+  Paso 3: construir la ruta con puntos
+    metadata.name        -> .metadata.name
+    spec.nodeName        -> .spec.nodeName
+    status.podIP         -> .status.podIP
+
+  Todo esto sin salir de la terminal y sin necesitar
+  kubernetes.io para custom-columns basico.
+
+REGLA SIMPLE PARA RECORDAR LA SINTAXIS:
+-----------------------------------------
+
+  La ruta es el camino de indentacion en el YAML
+  separado por puntos.
+
+  Si en el YAML ves:
+    spec:
+      nodeName: worker-01
+
+  La ruta es: .spec.nodeName
+  En custom-columns: NODE:.spec.nodeName
+
+  Si en el YAML ves:
+    spec:
+      containers:
+      - image: nginx
+
+  La ruta es: .spec.containers[0].image
+  En custom-columns: IMAGE:.spec.containers[0].image
+  El [0] indica el primer elemento de la lista
+
+  Mis notas:
+
+  k get nodes -o custom-columns=RUNTIME:.status.nodeInfo.containerRuntimeVersion
+
+  kgp -o custom-columns=NODE_NAME:.spec.nodeName
+
+
+  Así seria custom-columns sin headers:
+
+  k get node cka-cp1 \
+  -o custom-columns=RUNTIME:.status.nodeInfo.containerRuntimeVersion \
+  --no-headers > /tmp/runtime.txt
+
+  Y así jsonpath que no es tan díficil 
+  k get node cka-cp1 -o jsonpath='{.status.nodeInfo.containerRuntimeVersion}' > /tmp/runtime.txt

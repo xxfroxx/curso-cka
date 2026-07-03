@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Curso CKA - Material de Estudio</title>
+    <link rel="stylesheet" href="./styles.css">
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Indice del curso">
+        <div class="brand">
+          <div class="brand-mark">CKA</div>
+          <div>
+            <p class="eyebrow">Material local</p>
+            <h1>Curso CKA</h1>
+          </div>
+        </div>
+
+        <label class="search">
+          <span>Buscar</span>
+          <input id="searchInput" type="search" placeholder="kubectl, etcd, upgrade...">
+        </label>
+
+        <nav id="moduleNav" class="module-nav"></nav>
+      </aside>
+
+      <main class="content">
+        <header class="topbar">
+          <button id="menuButton" class="icon-button" type="button" aria-label="Mostrar indice">☰</button>
+          <div>
+            <p class="eyebrow">Fuente: CURSO-CKA-claude.txt</p>
+            <h2 id="pageTitle">Cargando curso...</h2>
+          </div>
+          <div class="topbar-actions">
+            <button id="expandAll" class="small-button" type="button">Expandir</button>
+            <button id="collapseAll" class="small-button" type="button">Contraer</button>
+          </div>
+        </header>
+
+        <section id="overview" class="overview" aria-label="Resumen del curso"></section>
+        <section id="searchState" class="search-state" hidden></section>
+        <section id="courseContent" class="course-content"></section>
+      </main>
+    </div>
+
+    <script src="./app.js"></script>
+  </body>
+</html>

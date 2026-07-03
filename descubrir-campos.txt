@@ -123,3 +123,34 @@ REGLA SIMPLE PARA RECORDAR LA SINTAXIS:
 
   Y así jsonpath que no es tan díficil 
   k get node cka-cp1 -o jsonpath='{.status.nodeInfo.containerRuntimeVersion}' > /tmp/runtime.txt
+
+  PRACTICA BUSCAR campos
+
+    kubectl get pod test-pod -o custom-columns=CONTAINER:.spec.containers[0].name,IMAGE:.spec.containers[0].image
+
+
+
+COMANDOS
+k get nodes -o wide  | grep -A5 -i container-runtime > /tmp/runtime.txt
+
+k run inspector --image=nginx:1.25 -n default
+
+k get pod inspector -o wide | grep -A5 -i node > /tmp/nodo.txt
+k get pod inspector -o wide | grep -A5 IP > /tmp/pod-ip.txt
+
+k delete pod inspect --force=true --timeout=0s -n default
+
+k delete pod inspect --force=true --timeout=0s -n default
+
+OUTPUT
+cat /tmp/runtime.txt; cat /tmp/nodo.txt; cat /tmp/pod-ip.txt; kubectl get pod inspector 2>&1
+NAME          STATUS   ROLES           AGE     VERSION   INTERNAL-IP     EXTERNAL-IP   OS-IMAGE             KERNEL-VERSION      CONTAINER-RUNTIME
+cka-cp1       Ready    control-plane   5d23h   v1.35.5   172.16.46.130   <none>        Ubuntu 24.04.4 LTS   6.8.0-117-generic   containerd://2.3.1
+cka-worker1   Ready    <none>          5d23h   v1.35.5   172.16.46.128   <none>        Ubuntu 24.04.4 LTS   6.8.0-117-generic   containerd://2.3.1
+cka-worker2   Ready    <none>          5d23h   v1.35.5   172.16.46.129   <none>        Ubuntu 24.04.4 LTS   6.8.0-117-generic   containerd://2.3.1
+NAME        READY   STATUS    RESTARTS   AGE    IP              NODE          NOMINATED NODE   READINESS GATES
+inspector   1/1     Running   0          4m9s   192.168.245.3   cka-worker2   <none>           <none>
+NAME        READY   STATUS    RESTARTS   AGE     IP              NODE          NOMINATED NODE   READINESS GATES
+inspector   1/1     Running   0          5m46s   192.168.245.3   cka-worker2   <none>           <none>
+NAME        READY   STATUS    RESTARTS   AGE
+inspector   1/1     Running   0          33m

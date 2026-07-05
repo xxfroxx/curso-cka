@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pkill -f \"[h]ttp.server 8011\")",
+      "Bash(curl -s -o /dev/null --max-time 1 http://127.0.0.1:8011/)",
+      "Bash(curl -s -o /dev/null -w \"app 8000: %{http_code}\\\\n\" http://127.0.0.1:8000/cka-study-web/)",
+      "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --window-size=1440,1000 --virtual-time-budget=4000 --dump-dom \"http://127.0.0.1:8000/cka-study-web/\")",
+      "Bash(node -e ' *)",
+      "Bash(git -C /home/wolframio/Documents/Curso_CKA status --short)",
+      "WebSearch",
+      "WebFetch(domain:meshora.dev)",
+      "WebFetch(domain:meshora.com)",
+      "WebFetch(domain:meshora.es)",
+      "WebFetch(domain:www.meshora.ai)",
+      "WebFetch(domain:kestrion.dev)",
+      "WebFetch(domain:kestrion.ai)",
+      "WebFetch(domain:zendrik.dev)",
+      "WebFetch(domain:zendrik.ai)",
+      "WebFetch(domain:kestrion.com)",
+      "WebFetch(domain:kestrion.es)",
+      "WebFetch(domain:zendrik.es)",
+      "Bash(ls -la /home/wolframio/Documents/ | head -20)",
+      "Read(//home/wolframio/Documents/**)",
+      "Bash(mkdir -p /home/wolframio/Documents/kestrion-web)",
+      "Bash(cp -r /home/wolframio/Documents/Curso_CKA/cka-study-web /home/wolframio/Documents/kestrion-web/)",
+      "Bash(cp -r /home/wolframio/Documents/Curso_CKA/modulos /home/wolframio/Documents/kestrion-web/)"
+    ]
+  }
+}

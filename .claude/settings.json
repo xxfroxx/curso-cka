@@ -37,11 +37,20 @@
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(python3 -)",
-      "Bash(git -C /home/wolframio/Documents/kestrion-web status -sb)"
+      "Bash(git -C /home/wolframio/Documents/kestrion-web status -sb)",
+      "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --window-size=1200,630 --screenshot=/home/wolframio/Documents/Curso_CKA/landing/og.png file:///tmp/claude-1000/-home-wolframio-Documents-Curso-CKA/22c21643-d261-40fb-942e-7f33d9fffe1a/scratchpad/og-card.html)",
+      "Bash(command -v pngquant optipng convert)",
+      "Bash(python3 -c ' *)",
+      "Bash(echo \"restos: $?\")",
+      "Bash(cd /home/wolframio/Documents/kestrion-web && cat .gitignore)",
+      "Read(//home/wolframio/Documents/kestrion-web/**)",
+      "Bash(curl -s https://kestrion.dev/)",
+      "Bash(curl -sv https://kestrion.dev/)"
     ],
     "additionalDirectories": [
       "/home/wolframio/Documents/kestrion-web",
-      "/tmp"
+      "/tmp",
+      "/tmp/claude-1000/-home-wolframio-Documents-Curso-CKA/22c21643-d261-40fb-942e-7f33d9fffe1a/scratchpad"
     ]
   }
 }

@@ -25,16 +25,16 @@ Por qué Cloudflare Pages sobre GitHub Pages: deploy automático desde el repo G
 
 ### 1.2 Adaptaciones necesarias en el código (pequeñas)
 
-1. **Manifiesto de módulos**: la detección automática actual lee el listado de directorio de `python http.server`; los hostings estáticos no generan listados. Solución: un paso de build de 5 líneas que genera `modulos/index.json` con la lista de ficheros (se ejecuta en el deploy de Cloudflare Pages), y que `loadCourseText()` lo use como primera opción manteniendo el listado como fallback local. Coste: bajo (~20 líneas).
+1. ✅ **Manifiesto de módulos** — HECHO: `cka-study-web/build-manifest.sh` genera `modulos/index.json` y `loadCourseText()` usa triple fuente (índice → listado local → TXT único).
 2. **SEO básico**: meta description, Open Graph, `sitemap.xml`, `robots.txt`, título por módulo en la URL (`#m01-...` ya existe; opcionalmente rutas reales con un pequeño prerender). Fase 2.
 3. **Dominio del contenido**: decidir qué se publica. El TXT contiene *tu* material de estudio; antes de publicar conviene una pasada editorial (erratas como "examen4.4", tono, ejemplos).
 4. **Privacidad del progreso**: el progreso seguirá en `localStorage` del visitante — funciona en público sin backend ni RGPD extra.
 
 ### 1.3 Pasos concretos de publicación
 
-1. Comprar dominio (sugerencias: `aprende-cka.com`, `cka-es.dev`, `kubectl.es` si está libre — ver §4 marca).
-2. Subir el repo a GitHub (ya tienes remote `xxfroxx/curso-cka`; valorar repo separado **público solo con la web** y contenido, sin notas personales como `descubrir-campos.txt`).
-3. Conectar Cloudflare Pages al repo, directorio de build `/`, comando de build: el script del manifiesto.
+1. ✅ Dominio comprado: `kestrion.dev` (Cloudflare Registrar).
+2. ✅ Repo público separado creado: `kestrion-dev/kestrion-cka` (solo web + módulos, sin notas ni docs privados).
+3. Conectar Cloudflare Pages al repo — build command `bash build.sh`, output directory `dist` (ver "Estado de ejecución § 3").
 4. Apuntar el dominio, activar HTTPS estricto, probar en móvil (la web ya es responsive).
 5. Alta en Google Search Console + Bing Webmaster y enviar sitemap.
 
@@ -65,7 +65,7 @@ Objetivo único: audiencia y SEO. Meter anuncios con 200 visitas/día mata la co
 
 **Fase 3 — Producto premium (el verdadero ingreso pasivo, mes 6–18):**
 
-- **Freemium**: M00–M02 gratis siempre (imán SEO); módulos avanzados + simulacros de examen completos + banco extra de preguntas = premium.
+- **Freemium**: los módulos base (hoy M00–M03) gratis siempre (imán SEO); módulos avanzados + simulacros de examen completos + banco extra de preguntas = premium.
 - **Formato**: pago único (19–39 €) mejor que suscripción para un examen puntual — la gente aprueba y se va; la suscripción genera cancelaciones y soporte.
 - **Infra de pago sin backend propio**: Gumroad / Lemon Squeezy / Stripe Payment Links + acceso por clave o zona con Cloudflare Access/Workers. Mantiene el "pasivo".
 - **Productos derivados casi gratis de producir**: PDF/cheatsheet imprimible del curso (5–9 €), pack de laboratorios con soluciones, plantilla de plan de estudio de 4 semanas.
@@ -218,8 +218,8 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 
 ## 4. Lo que no mencionaste y conviene tener en cuenta
 
-1. **Marca registrada**: "CKA®" y "Kubernetes®" son marcas de la Linux Foundation/CNCF. Puedes decir "curso de preparación para el examen CKA", pero **no** usar CKA/Kubernetes como nombre del sitio o dominio de forma que sugiera afiliación oficial, ni sus logos. Elige marca propia (ej. "KubePrep en español", "AprueboK8s") con el término CKA en titulares descriptivos. Esto también afecta a AdSense/afiliados (revisiones de policy).
-2. **Licencia del contenido**: decide si el contenido es todo-derechos-reservados o CC BY-NC. Si publicas el código de la web como open source (buen marketing), sepáralo del contenido del curso (el código MIT, el contenido con copyright) — si no, cualquiera clona el curso entero.
+1. **Marca registrada** *(✅ resuelto con la marca Kestrion)*: "CKA®" y "Kubernetes®" son marcas de la Linux Foundation/CNCF. Puedes decir "curso de preparación para el examen CKA", pero **no** usar CKA/Kubernetes como nombre del sitio o dominio de forma que sugiera afiliación oficial, ni sus logos. La landing incluye el disclaimer de no afiliación en el footer.
+2. **Licencia del contenido** *(✅ decidido: licencia dual)*: código MIT, contenido del curso © Kestrion (`LICENSE` + `modulos/LICENSE.txt` + aviso en cada TXT) — el código open source hace marketing y el curso queda protegido frente a republicación.
 3. **RGPD/legal mínimo aun sin registro**: aviso legal + política de privacidad + banner de cookies *solo si* usas AdSense/analytics con cookies (Cloudflare Analytics y Plausible no las usan → sin banner). Si vendes premium: condiciones de venta, y facturación como autónomo/actividad económica en tu país — consúltalo antes de cobrar el primer euro.
 4. **Accesibilidad e i18n**: el contenido sin tildes del TXT está bien para terminal, pero de cara a SEO/lectores conviene una pasada con tildes correctas (afecta a cómo Google entiende el texto).
 5. **Prueba social**: desde el día 1, recoge testimonios ("aprobé usando esto") — es el activo de conversión número 1 para el premium.
@@ -457,8 +457,8 @@ Primeros 3 artículos (semanas 1-3 post-lanzamiento):
 - [ ] Tema claro y oscuro conmutan correctamente
 
 **Documentación:**
-- [ ] README actualizado en repo con instrucciones de desarrollo
-- [ ] Este documento (PLAN-PUBLICACION-Y-NEGOCIO.md) reflejando estado actual
+- [x] README actualizado en repo con instrucciones de desarrollo
+- [x] Este documento (PLAN-PUBLICACION-Y-NEGOCIO.md) reflejando estado actual
 
 ---
 
@@ -466,7 +466,7 @@ Primeros 3 artículos (semanas 1-3 post-lanzamiento):
 
 | Semana | Tarea | Responsable |
 |--------|-------|---|
-| 1 | Fable: `index.json` + robots.txt/sitemap | Fable |
+| 1 | Fable: ~~`index.json`~~ ✅ + robots.txt/sitemap/og:image | Fable |
 | 1 | Usuario: pasada editorial, legal | Usuario |
 | 2 | Usuario + Fable: Cloudflare Pages + Email Routing | Ambos |
 | 2 | Usuario: alta en GSC/Bing, primer post LinkedIn | Usuario |

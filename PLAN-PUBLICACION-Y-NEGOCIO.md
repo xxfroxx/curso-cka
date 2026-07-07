@@ -183,3 +183,312 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 3. Aviso legal/privacidad + decidir marca y licencia → **1 semana en paralelo**.
 4. Rutina de marketing (SEO + LinkedIn) → **desde el día 1 del lanzamiento**.
 5. Lista de email al superar ~3k visitas/mes; premium al superar ~10k y tener 300+ suscriptores.
+
+---
+
+## Estado de ejecución (julio 2026)
+
+### ✅ Completado
+
+#### Infraestructura e identidad (separación completa)
+- **Marca elegida**: `Kestrion` (nombre inventado, sin choques de mercado)
+- **Dominio**: `kestrion.dev` (Cloudflare Registrar, WHOIS privado activado, auto-renew configurado)
+- **Email maestro**: `kestrion@proton.me` (cuenta Proton independiente, separada de identidad personal)
+- **GitHub**: cuenta `kestrion-dev` creada, 2FA activado, email privado configurado (`300158305+kestrion-dev@users.noreply.github.com`)
+- **Repo público**: `kestrion-cka` en `https://github.com/kestrion-dev/kestrion-cka.git`
+  - Commits con autor "Kestrion Dev Team" (sin identidad personal)
+  - Contiene: web de estudio + módulos TXT
+  - Excluye: notas personales, plan de negocio, documentos privados
+  - Branch principal: `main`
+
+#### Decisiones de arquitectura
+- Hosting: Cloudflare Pages (gratuito, estático puro, sin backend)
+- Código: web estática (HTML/CSS/JS) + módulos como ficheros TXT
+- Hosting de datos: localStorage en navegador (sin backend, sin RGPD extra)
+- Monetización: afiliación + ads discretos + premium (Fases 2-3)
+
+---
+
+### ⏳ Pendiente — Fase 1: Publicación técnica
+
+**Responsabilidad: Fable (agente técnico)**
+
+#### 1. Manifiesto de módulos (`modulos/index.json`)
+
+**Problema**: `app.js` detecta módulos leyendo el listado de directorio HTTP; Cloudflare Pages (hosting estático) no genera listados.
+
+**Solución**: 
+- Crear archivo `modulos/index.json` que liste explícitamente los ficheros y metadatos
+- Modificar `app.js` para:
+  1. Intentar cargar `modulos/index.json` primero
+  2. Si no existe, fallback al listado de directorio (compatibilidad con `python http.server` local)
+- Script de build opcional: `build-manifest.js` que genera el JSON automáticamente (ejecutable en deploy de Cloudflare Pages)
+
+**Coste**: ~20 líneas de código
+
+**Referencia**: Plan § 1.2
+
+---
+
+#### 2. SEO base (mínimo requerido antes de lanzar)
+
+**Archivos a crear**:
+
+- `robots.txt`: permitir indexación, desallow de rutas privadas (si existen), apuntar a `sitemap.xml`
+- `sitemap.xml`: listado de todos los módulos + secciones principales (puede ser estático o generado en build)
+
+**Cambios en `index.html`**:
+
+- Meta description estática (genérica para inicio) o dinámica por módulo (si se prerender)
+  - Ej: `<meta name="description" content="Curso interactivo gratuito para certificación CKA en español. Quiz, labs cronometrados y progreso sincronizado.">`
+- Open Graph (og:title, og:description, og:image) para compartir en redes
+  - Ej: `<meta property="og:title" content="Kestrion: Preparación CKA en español">`
+- Schema.org (JSON-LD) para `Course` (página principal) y `FAQPage` (checkpoints como FAQ)
+
+**Coste**: ~50 líneas HTML + archivos estáticos
+
+**Fase**: 2 (post-lanzamiento), pero planificar estructura ya
+
+---
+
+#### 3. Conectar Cloudflare Pages
+
+**Pasos** (ejecutar en Cloudflare dashboard):
+1. Crear nuevo proyecto en Cloudflare Pages
+2. Conectar repo `kestrion-dev/kestrion-cka`
+3. Configurar build:
+   - Framework: None (sitio estático)
+   - Build command: `node build-manifest.js` (si creas el script para generar `index.json`)
+   - Build output directory: `/` (raíz del repo)
+4. Apuntar dominio `kestrion.dev` → Cloudflare Pages
+5. HTTPS automático (ya viene incluido)
+6. Activar HTTPS estricto en Cloudflare settings
+
+**Test de validación**:
+- [ ] Accesible en `https://kestrion.dev`
+- [ ] Módulos cargan correctamente (sin errores 404)
+- [ ] localStorage persiste al recargar
+- [ ] Responsive en móvil
+
+---
+
+### ⏳ Pendiente — Fase 1.5: Legal e infraestructura
+
+**Responsabilidad: Comparta entre ambos (marco legal + setup técnico)**
+
+#### 4. Documentos legales
+
+- `aviso-legal.md` o `.html`: nombre del titular, sede, datos de contacto (mínimo RGPD EU)
+- `politica-privacidad.md` o `.html`: explicar que:
+  - No almacena datos personales (localStorage solo en navegador del usuario)
+  - No usa cookies (Cloudflare Analytics no requiere banner)
+  - No colecta emails sin consentimiento explícito (opt-in para newsletter)
+  - Cumple RGPD
+- Decidir **licencia**:
+  - Código: MIT (open source, permisivo)
+  - Contenido (TXT): Copyright © Kestrion Dev Team (o CC BY-NC si quieres permisividad)
+  - Crear `LICENSE` en repo (elegir entre MIT, CC0, CC BY-NC)
+
+**Ubicación**: enlaces en footer o página `/legal`
+
+---
+
+#### 5. Email Routing (Cloudflare)
+
+- Crear alias `contacto@kestrion.dev` → `kestrion@proton.me`
+- (Opcional futuro: `hola@kestrion.dev`, `soporte@kestrion.dev`)
+- Test: enviar email a `contacto@kestrion.dev`, verificar que llega a bandeja de Proton
+
+---
+
+#### 6. Analítica sin cookies
+
+- Activar Cloudflare Web Analytics (incluido, sin cookies, RGPD-safe)
+- Crear cuenta en Google Search Console (para monitorear keywords, CTR, errores)
+- Crear cuenta en Bing Webmaster Tools
+- Enviar `sitemap.xml` a ambos
+
+---
+
+### ⏳ Pendiente — Fase 2: Marketing y contenido
+
+**Responsabilidad: Planificación y ejecución (usuario)**
+
+#### 7. Pasada editorial
+
+- Revisar TXT de módulos: erratas, acentos, tono académico
+- Validar que comandos/ejemplos funcionan con K8s actual (v1.30+)
+- Versionar cambios en commits con mensaje claro
+
+#### 8. Artículos satélite (blog/contenido SEO)
+
+Primeros 3 artículos (semanas 1-3 post-lanzamiento):
+- "10 errores que suspenden el examen CKA"
+- "CKA vs CKAD vs CKS: cuál estudiar en 2026"
+- "Cuánto cuesta el examen CKA y dónde registrarse"
+
+**Formato**: Markdown en carpeta `blog/` (opcional: convertir a HTML estático o usar páginas dinámicas)
+
+**SEO**: cada artículo enlaza a módulos relevantes de la web principal
+
+---
+
+#### 9. Presencia en redes (LinkedIn, YouTube, Discord, Reddit)
+
+**LinkedIn** (2-3 posts/semana):
+- Tips del curso (tip técnico + enlace a módulo)
+- Testimonios ("aprobé el CKA usando esta web")
+- Actualizaciones ("Kestrion ahora cubre etcd clustering")
+
+**YouTube/Shorts**:
+- Clips de 60s resolviendo labs cronometrados
+- 1 vídeo largo/mes ("resuelvo un simulacro completo en directo")
+
+**Comunidades**:
+- Discord/Slack de Kubernetes en español
+- Reddit r/kubernetes, r/devopsish
+- Telegram DevOps LATAM
+
+**Regla**: aportar respuestas genuinas, no spamear enlaces
+
+---
+
+#### 10. Newsletter quincenal
+
+- Plataforma: Brevo (gratis hasta 300 emails/día) o MailerLite
+- Contenido: 1 pregunta quiz + 1 truco + 1 artículo nuevo
+- Lead magnet: "Descarga el cheatsheet CKA en PDF" (PDF estático en repo o Google Drive)
+- Secuencia de bienvenida: 5 emails automatizados (drip) que termina ofreciendo premium
+
+---
+
+### 📋 Checklist antes de ir live
+
+**Código y contenido:**
+- [ ] `modulos/index.json` generado o creado manualmente
+- [ ] `robots.txt` y `sitemap.xml` presentes
+- [ ] Meta descriptions y Open Graph en `index.html`
+- [ ] Aviso legal y política de privacidad accesibles (footer)
+- [ ] Licencia (`LICENSE`) definida y en repo
+- [ ] `README.md` actualizado (descripción breve, instrucciones de desarrollo)
+
+**Infraestructura:**
+- [ ] Cloudflare Pages deployado en `kestrion.dev` (rama `main`)
+- [ ] Dominio apuntando a Pages
+- [ ] HTTPS estricto activado en Cloudflare
+- [ ] Email Routing funcionando (`contacto@kestrion.dev` → `kestrion@proton.me`)
+- [ ] Cloudflare Web Analytics activo
+
+**SEO y descubrimiento:**
+- [ ] Google Search Console: proyecto creado, sitemap enviado, sin errores de rastreo
+- [ ] Bing Webmaster: proyecto creado, sitemap enviado
+- [ ] Schema.org Course/FAQPage en JSON-LD (opcional pero recomendado)
+
+**Validación del producto:**
+- [ ] Accesible en `https://kestrion.dev` (HTTPS válido)
+- [ ] Módulos cargan correctamente (sin errores 404 en recursos)
+- [ ] Búsqueda funciona
+- [ ] Quiz y soluciones ocultas funcionan
+- [ ] Cronómetros funcionan
+- [ ] localStorage persiste (marcar como estudiado, recargar, verificar que sigue marcado)
+- [ ] Responsive en móvil (iPhone 12, Android, tablet)
+- [ ] Tema claro y oscuro conmutan correctamente
+
+**Documentación:**
+- [ ] README actualizado en repo con instrucciones de desarrollo
+- [ ] Este documento (PLAN-PUBLICACION-Y-NEGOCIO.md) reflejando estado actual
+
+---
+
+### 🎯 Próximos hitos (estimado)
+
+| Semana | Tarea | Responsable |
+|--------|-------|---|
+| 1 | Fable: `index.json` + robots.txt/sitemap | Fable |
+| 1 | Usuario: pasada editorial, legal | Usuario |
+| 2 | Usuario + Fable: Cloudflare Pages + Email Routing | Ambos |
+| 2 | Usuario: alta en GSC/Bing, primer post LinkedIn | Usuario |
+| 3-4 | Usuario: 3 artículos satélite, Product Hunt/HN | Usuario |
+| 4+ | Usuario: newsletter, rutina semanal de redes | Usuario |
+
+**Target de lanzamiento: final de semana 2**
+
+---
+
+## Estado de ejecución (julio 2026)
+
+### ✅ Completado
+
+**Infraestructura e identidad:**
+- Marca elegida: **Kestrion** (nombre inventado, sin choques)
+- Dominio: **kestrion.dev** registrado en Cloudflare Registrar (WHOIS privado activado, privacidad gratis)
+- Email maestro: **kestrion@proton.me** (cuenta Proton independiente, separada de identidad personal)
+- GitHub: cuenta **kestrion-dev** creada, 2FA activado, email privado configurado (`300158305+kestrion-dev@users.noreply.github.com`)
+- Repo público: **kestrion-cka** en `https://github.com/kestrion-dev/kestrion-cka.git` con commit inicial (web + módulos, sin notas personales/plan)
+- Git config local: autor "Kestrion Dev Team" con email noreply real de GitHub
+
+### ⏳ Pendiente — Fase 1: adaptación técnica
+
+**Código a mejorar (delegado a agente Fable):**
+
+1. **`modulos/index.json`** — manifiesto de módulos para hosting estático
+   - Problema: `app.js` detecta módulos leyendo listado de directorio (solo funciona con `python http.server` local)
+   - Solución: crear un archivo `modulos/index.json` que liste explícitamente los ficheros
+   - Cambio en `app.js`: usar `loadCourseModules()` que intenta cargar `modulos/index.json` primero, fallback al listado si no existe
+   - Coste: ~20 líneas de código
+   
+2. **SEO base** (fase 2, pero planificar ya):
+   - `sitemap.xml` (listado de todos los módulos/secciones)
+   - `robots.txt` (permitir indexación, apuntar a sitemap)
+   - Meta descriptions en `index.html` dinámicas por módulo (requiere pequeño prerender o server-side templating; por ahora: meta genérica estática)
+   - Schema.org `Course` y `FAQPage` en JSON-LD
+   - Open Graph (og:title, og:description, og:image) para compartir en redes
+
+**Infraestructura:**
+
+3. **Conectar Cloudflare Pages**
+   - Crear nuevo proyecto en Cloudflare Pages, conectar repo `kestrion-dev/kestrion-cka`
+   - Build command: `node build-manifest.js` (script que genera `modulos/index.json` antes del deploy)
+   - Publicar en `kestrion.dev` (apuntar dominio a Pages)
+   - HTTPS automático
+
+4. **Email Routing**
+   - Configurar alias `contacto@kestrion.dev` que reenvíe a `kestrion@proton.me`
+   - (Opcional: `hola@kestrion.dev`, `soporte@kestrion.dev` para futuro)
+
+5. **Analítica**
+   - Activar Cloudflare Web Analytics (sin cookies, RGPD-safe)
+   - Configurar Google Search Console + Bing Webmaster con el sitemap
+
+### ⏳ Pendiente — Fase 2: legal y contenido
+
+6. **Documentos legales**
+   - `aviso-legal.html` / `.md`
+   - `politica-privacidad.html` / `.md`
+   - Decidir licencia: código MIT (open source), contenido copyright o CC BY-NC
+   - Crear `LICENSE` en el repo
+
+7. **Pasada editorial del contenido**
+   - Revisar TXT por erratas ("examen4.4", acentos, tono)
+   - Revisar que ejemplos y comandos funcionan con K8s actual
+
+### ⏳ Pendiente — Fase 3: lanzamiento y marketing
+
+8. **Preparar lanzamiento**
+   - Redactar descripción corta de la web (para README, meta, etc.)
+   - Preparar primer post de LinkedIn (anuncio "aquí está la web")
+   - Preparar mensaje para Product Hunt / Hacker News
+   - Recopilar emails para newsletter inicial (si hay contactos previos)
+
+### 📋 Checklist antes de ir live
+
+- [ ] `modulos/index.json` generado automáticamente en build
+- [ ] `robots.txt` + `sitemap.xml` presentes
+- [ ] Meta descriptions y Open Graph en `index.html`
+- [ ] Aviso legal y política de privacidad accesibles (footer o `/legal`)
+- [ ] Cloudflare Pages deployado en `kestrion.dev`
+- [ ] Email Routing funcionando (probar mandar email a contacto@kestrion.dev)
+- [ ] Google Search Console y Bing Webmaster dada de alta, sitemap enviado
+- [ ] HTTPS estricto activado en Cloudflare
+- [ ] Probar en móvil (responsive)
+- [ ] Test rápido: cargar módulo, buscar, marcar como estudiado, recargar (localStorage persiste)

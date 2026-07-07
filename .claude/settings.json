@@ -23,7 +23,23 @@
       "Read(//home/wolframio/Documents/**)",
       "Bash(mkdir -p /home/wolframio/Documents/kestrion-web)",
       "Bash(cp -r /home/wolframio/Documents/Curso_CKA/cka-study-web /home/wolframio/Documents/kestrion-web/)",
-      "Bash(cp -r /home/wolframio/Documents/Curso_CKA/modulos /home/wolframio/Documents/kestrion-web/)"
+      "Bash(cp -r /home/wolframio/Documents/Curso_CKA/modulos /home/wolframio/Documents/kestrion-web/)",
+      "Bash(chmod +x cka-study-web/build-manifest.sh)",
+      "Bash(./cka-study-web/build-manifest.sh)",
+      "Bash(bash -n cka-study-web/start.sh)",
+      "Bash(bash -n cka-study-web/build-manifest.sh)",
+      "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --window-size=1440,1050 --virtual-time-budget=3000 --screenshot=/tmp/claude-1000/-home-wolframio-Documents-Curso-CKA/22c21643-d261-40fb-942e-7f33d9fffe1a/scratchpad/landing-light.png http://127.0.0.1:8001/?x=1)",
+      "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --window-size=1440,1050 --virtual-time-budget=3000 --dump-dom \"http://127.0.0.1:8001/app/\")",
+      "Bash(bash cka-study-web/build-manifest.sh)",
+      "Bash(bash build.sh)",
+      "Bash(curl -s http://127.0.0.1:8000/cka-study-web/)",
+      "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --virtual-time-budget=4000 --dump-dom \"http://127.0.0.1:8000/cka-study-web/\")",
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)"
+    ],
+    "additionalDirectories": [
+      "/home/wolframio/Documents/kestrion-web",
+      "/tmp"
     ]
   }
 }

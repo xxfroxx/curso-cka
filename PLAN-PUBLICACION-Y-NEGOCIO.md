@@ -129,7 +129,58 @@ Analogía correcta: marketplace = publicar con editorial (distribución a cambio
 
 Formatos distintos (web interactiva ≠ vídeo ≠ simulacros), así que no se canibalizan. Orden de ejecución: web primero (ya casi está), Udemy cuando exista rutina de contenido (la grabación son semanas), premium cuando haya lista.
 
-### 2.6 Números orientativos (escenario conservador)
+### 2.6 Estrategia de portfolio: Kestrion B2C + Kestrion Consulting B2B
+
+**Problema**: confundir B2C (estudiantes, gratuito/premium) y B2B (empresas, servicios) en la misma marca genera fricción:
+- Estudiantes buscan contenido gratis, ven "servicios de consultoría" en el footer y rebotan
+- Empresas buscan consultor, no una web de estudio — no llegan a través de SEO de "CKA gratis"
+- Mensajes compiten por atención: credibilidad basada en volumen vs. credibilidad basada en expertise
+
+**Estrategia recomendada: dos sitios, un pipeline**
+
+#### Kestrion.dev — B2C (Ahora — Español first, Inglés después)
+- **Público**: estudiantes hispanohablantes preparando CKA/CKAD/CKS (Fase 1-2); luego extender a audiencia anglófona
+- **Idioma v1 (mes 0-3)**: español puro (landing, módulos, blog, newsletter)
+- **Idioma v2 (mes 3-6)**: agregar inglés como i18n opcional (rutas `/es/` y `/en/`, toggle en web) — prioridad baja hasta que se estabilice el tráfico en español
+- **Modelo**: web gratuita (Fase 1) → afiliación + ads (Fase 2) → premium (Fase 3)
+- **Timeline**: 
+  - 0-3 meses: lanzamiento español, construcción SEO hispanohablante
+  - 3-6 meses: crecimiento tráfico, primeras traducciones a inglés
+  - 6-18 meses: ingresos pasivos en ambos idiomas
+- **Meta mes 18-24**: 50k+ visitas/mes (mixto español+inglés) → 500-1.500 €/mes en ingresos (afiliados + premium)
+- **Asset generado**: lista de email (500-1k suscriptores de calidad por mes 6, mayormente hispanohablantes)
+
+#### Kestrion Consulting — B2B (Mes 6+, 100% Inglés)
+- **Público**: empresas y equipos globales que ya dominan Kubernetes, buscan: design reviews, migraciones, arquitectura cloud-native, formación in-house
+- **Idioma**: **inglés desde el inicio** (mercado B2B es anglófono por defecto, no necesita español)
+- **Modelo**: retainers (3-5k €/mes) + proyectos puntuales (10-20k € c/u)
+- **Posicionamiento**: "Cloud-native engineering team. We've passed CKA/CKAD/CKS and led Kubernetes projects at scale. Learn from Kestrion (free); hire us for architecture & consulting."
+- **Lead gen**: LinkedIn (primary) + casos de estudio + referrals desde lista de Kestrion.dev
+- **Dominio**: `kestrion-consulting.dev` o `kestrion.design` o similar (separado de Kestrion.dev)
+- **Landing**: portfolio, case studies, pricing, contact form (simple, no es e-commerce)
+
+#### Por qué "primero tráfico" (Kestrion B2C)
+
+| Fase | Tráfico | Lista | Casos | Credibilidad B2B | Lead consulting |
+|---|---|---|---|---|---|
+| **Mes 0** | 0 | 0 | 0 | Baja (web nueva) | Bajo/nulo |
+| **Mes 6** | 10-15k/mes | 500-1k | 5-10 | Media (tráfico probado) | Medio (gente que ya te conoce) |
+| **Mes 12** | 20-40k/mes | 1.5-3k | 20-30 | Alta (casos documentados) | Alto (conversión >5%) |
+| **Mes 18-24** | 50k+/mes | 3-5k | 50+ | Muy alta | Muy alto (inbound + referrals) |
+
+**Resultado**: si intentas consulting sin Kestrion, gastas 6 meses en LinkedIn/outbound sin tracción. Si construyes Kestrion primero, en mes 6 tienes credibilidad real para vender servicios a empresas que descubrieron la web.
+
+#### Materiales compartidos
+- Marca Kestrion (logo, colores, tone of voice)
+- Comunidad en Discord/Telegram (formada desde newsletter)
+- Autoridad técnica (casos de estudio desde estudiantes que aprobaron)
+
+#### No se canibalizan
+- Kestrion.dev = tráfico gratuito, lead magnet, comunidad técnica
+- Kestrion Consulting = venta B2B directa, alto ticket, pocas deals/mes
+- Público distinto, timing distinto, canales distintos
+
+### 2.7 Números orientativos (escenario conservador)
 
 | Hito | Tráfico/mes | Ingreso/mes estimado |
 |---|---|---|
@@ -206,6 +257,14 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 - Código: web estática (HTML/CSS/JS) + módulos como ficheros TXT
 - Hosting de datos: localStorage en navegador (sin backend, sin RGPD extra)
 - Monetización: afiliación + ads discretos + premium (Fases 2-3)
+- Repo público con **licencia dual**: código MIT, contenido © Kestrion (protección DMCA frente a republicación)
+
+#### Fase técnica ejecutada (5–7 julio, commits `f3a0739` + `2f54897`, ya pusheados)
+- **Landing pública** (`landing/`): hero con mock de la app, funciones, módulos, FAQ, disclaimer de marcas LF/CNCF, botón "continuar" si hay progreso previo, hueco para futuros banners/consultoría
+- **Rebrand** de la app a Kestrion (título, cabecera, meta description)
+- **Manifiesto de módulos**: `modulos/index.json` + `cka-study-web/build-manifest.sh`; `app.js` con triple fuente (índice → listado local → TXT único), tolerante a manifiestos desfasados
+- **`build.sh`** ensambla `dist/` (landing en raíz, app en `/app/`, módulos): listo para CF Pages con build command `bash build.sh` y output `dist`
+- **Licencia dual**: `LICENSE` (MIT código), `modulos/LICENSE.txt` (© contenido), aviso en cada TXT (la app lo descarta al cargar), README raíz del repo público
 
 ---
 
@@ -213,9 +272,11 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 
 **Responsabilidad: Fable (agente técnico)**
 
-#### 1. Manifiesto de módulos (`modulos/index.json`)
+#### 1. ✅ Manifiesto de módulos (`modulos/index.json`) — HECHO
 
-**Problema**: `app.js` detecta módulos leyendo el listado de directorio HTTP; Cloudflare Pages (hosting estático) no genera listados.
+Resuelto con `cka-study-web/build-manifest.sh` + triple fuente en `app.js` + `build.sh` que ensambla `dist/` (la landing queda en la raíz de kestrion.dev y la app en `/app/`). En Cloudflare Pages: build command `bash build.sh`, output directory `dist`.
+
+**Problema (original)**: `app.js` detecta módulos leyendo el listado de directorio HTTP; Cloudflare Pages (hosting estático) no genera listados.
 
 **Solución**: 
 - Crear archivo `modulos/index.json` que liste explícitamente los ficheros y metadatos
@@ -258,8 +319,8 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 2. Conectar repo `kestrion-dev/kestrion-cka`
 3. Configurar build:
    - Framework: None (sitio estático)
-   - Build command: `node build-manifest.js` (si creas el script para generar `index.json`)
-   - Build output directory: `/` (raíz del repo)
+   - Build command: `bash build.sh`
+   - Build output directory: `dist`
 4. Apuntar dominio `kestrion.dev` → Cloudflare Pages
 5. HTTPS automático (ya viene incluido)
 6. Activar HTTPS estricto en Cloudflare settings
@@ -365,12 +426,13 @@ Primeros 3 artículos (semanas 1-3 post-lanzamiento):
 ### 📋 Checklist antes de ir live
 
 **Código y contenido:**
-- [ ] `modulos/index.json` generado o creado manualmente
+- [x] `modulos/index.json` generado o creado manualmente *(build-manifest.sh, regenerado en cada build)*
 - [ ] `robots.txt` y `sitemap.xml` presentes
-- [ ] Meta descriptions y Open Graph en `index.html`
+- [x] Meta descriptions y Open Graph en `index.html` *(landing con OG completo y app con meta description; falta og:image)*
 - [ ] Aviso legal y política de privacidad accesibles (footer)
-- [ ] Licencia (`LICENSE`) definida y en repo
-- [ ] `README.md` actualizado (descripción breve, instrucciones de desarrollo)
+- [x] Licencia (`LICENSE`) definida y en repo *(dual: código MIT, contenido © Kestrion)*
+- [x] `README.md` actualizado (descripción breve, instrucciones de desarrollo)
+- [x] **Landing page** en la raíz del sitio *(no estaba en el plan original; hecha el 5 jul)*
 
 **Infraestructura:**
 - [ ] Cloudflare Pages deployado en `kestrion.dev` (rama `main`)
@@ -412,83 +474,3 @@ Primeros 3 artículos (semanas 1-3 post-lanzamiento):
 | 4+ | Usuario: newsletter, rutina semanal de redes | Usuario |
 
 **Target de lanzamiento: final de semana 2**
-
----
-
-## Estado de ejecución (julio 2026)
-
-### ✅ Completado
-
-**Infraestructura e identidad:**
-- Marca elegida: **Kestrion** (nombre inventado, sin choques)
-- Dominio: **kestrion.dev** registrado en Cloudflare Registrar (WHOIS privado activado, privacidad gratis)
-- Email maestro: **kestrion@proton.me** (cuenta Proton independiente, separada de identidad personal)
-- GitHub: cuenta **kestrion-dev** creada, 2FA activado, email privado configurado (`300158305+kestrion-dev@users.noreply.github.com`)
-- Repo público: **kestrion-cka** en `https://github.com/kestrion-dev/kestrion-cka.git` con commit inicial (web + módulos, sin notas personales/plan)
-- Git config local: autor "Kestrion Dev Team" con email noreply real de GitHub
-
-### ⏳ Pendiente — Fase 1: adaptación técnica
-
-**Código a mejorar (delegado a agente Fable):**
-
-1. **`modulos/index.json`** — manifiesto de módulos para hosting estático
-   - Problema: `app.js` detecta módulos leyendo listado de directorio (solo funciona con `python http.server` local)
-   - Solución: crear un archivo `modulos/index.json` que liste explícitamente los ficheros
-   - Cambio en `app.js`: usar `loadCourseModules()` que intenta cargar `modulos/index.json` primero, fallback al listado si no existe
-   - Coste: ~20 líneas de código
-   
-2. **SEO base** (fase 2, pero planificar ya):
-   - `sitemap.xml` (listado de todos los módulos/secciones)
-   - `robots.txt` (permitir indexación, apuntar a sitemap)
-   - Meta descriptions en `index.html` dinámicas por módulo (requiere pequeño prerender o server-side templating; por ahora: meta genérica estática)
-   - Schema.org `Course` y `FAQPage` en JSON-LD
-   - Open Graph (og:title, og:description, og:image) para compartir en redes
-
-**Infraestructura:**
-
-3. **Conectar Cloudflare Pages**
-   - Crear nuevo proyecto en Cloudflare Pages, conectar repo `kestrion-dev/kestrion-cka`
-   - Build command: `node build-manifest.js` (script que genera `modulos/index.json` antes del deploy)
-   - Publicar en `kestrion.dev` (apuntar dominio a Pages)
-   - HTTPS automático
-
-4. **Email Routing**
-   - Configurar alias `contacto@kestrion.dev` que reenvíe a `kestrion@proton.me`
-   - (Opcional: `hola@kestrion.dev`, `soporte@kestrion.dev` para futuro)
-
-5. **Analítica**
-   - Activar Cloudflare Web Analytics (sin cookies, RGPD-safe)
-   - Configurar Google Search Console + Bing Webmaster con el sitemap
-
-### ⏳ Pendiente — Fase 2: legal y contenido
-
-6. **Documentos legales**
-   - `aviso-legal.html` / `.md`
-   - `politica-privacidad.html` / `.md`
-   - Decidir licencia: código MIT (open source), contenido copyright o CC BY-NC
-   - Crear `LICENSE` en el repo
-
-7. **Pasada editorial del contenido**
-   - Revisar TXT por erratas ("examen4.4", acentos, tono)
-   - Revisar que ejemplos y comandos funcionan con K8s actual
-
-### ⏳ Pendiente — Fase 3: lanzamiento y marketing
-
-8. **Preparar lanzamiento**
-   - Redactar descripción corta de la web (para README, meta, etc.)
-   - Preparar primer post de LinkedIn (anuncio "aquí está la web")
-   - Preparar mensaje para Product Hunt / Hacker News
-   - Recopilar emails para newsletter inicial (si hay contactos previos)
-
-### 📋 Checklist antes de ir live
-
-- [ ] `modulos/index.json` generado automáticamente en build
-- [ ] `robots.txt` + `sitemap.xml` presentes
-- [ ] Meta descriptions y Open Graph en `index.html`
-- [ ] Aviso legal y política de privacidad accesibles (footer o `/legal`)
-- [ ] Cloudflare Pages deployado en `kestrion.dev`
-- [ ] Email Routing funcionando (probar mandar email a contacto@kestrion.dev)
-- [ ] Google Search Console y Bing Webmaster dada de alta, sitemap enviado
-- [ ] HTTPS estricto activado en Cloudflare
-- [ ] Probar en móvil (responsive)
-- [ ] Test rápido: cargar módulo, buscar, marcar como estudiado, recargar (localStorage persiste)

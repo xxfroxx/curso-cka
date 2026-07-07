@@ -38,7 +38,7 @@ Documento de traspaso técnico de `cka-study-web/`: cómo estaba el proyecto al 
 
 ### Contenido modular
 
-- El curso se partió en **un TXT por módulo** en `modulos/` (`M00-entorno-kubectl.txt` … `M03-rbac-seguridad.txt`), con verificación byte a byte contra el original. La web detecta los ficheros automáticamente (listado del servidor de `start.sh`, orden alfabético por nombre `MXX-...`): añadir un módulo = soltar el fichero y refrescar. `CURSO-CKA-claude.txt` queda como respaldo/fallback.
+- El curso se partió en **un TXT por módulo** en `modulos/` (`M00-entorno-kubectl.txt` … `M03-rbac-seguridad.txt`), con verificación byte a byte contra el original. La web los detecta con **tres fuentes en orden**: `modulos/index.json` (manifiesto generado por `cka-study-web/build-manifest.sh` — imprescindible en hosting estático, que no genera listados de directorio), listado del servidor local de `start.sh`, y `CURSO-CKA-claude.txt` como último recurso. Orden alfabético por nombre `MXX-...` (solo se aceptan ficheros `M##*.txt`): añadir un módulo = soltar el fichero y refrescar (`start.sh` regenera el índice al arrancar).
 
 ### Operativa
 
@@ -50,3 +50,13 @@ Documento de traspaso técnico de `cka-study-web/`: cómo estaba el proyecto al 
 - `node --check` en los JS y harness en Node que parsea el TXT real (módulos, quiz, timers, IDs únicos).
 - Chrome headless: capturas en claro y oscuro, recuento de componentes en el DOM (módulos, quiz, spoiler, cronómetro) y prueba de persistencia real sembrando `localStorage` en un perfil.
 - Migración a `modulos/`: `diff` byte a byte de la concatenación contra el original y comprobación de que los 132 IDs de sección son idénticos (progreso intacto).
+
+## Fase de publicación — Kestrion (5–7 julio 2026)
+
+- **Marca Kestrion**: rebrand de la app (título "Kestrion — Preparación CKA en español", cabecera con la marca K, meta description). Repo público `kestrion-dev/kestrion-cka` como espejo de lo publicable (`cka-study-web/`, `modulos/`, `landing/`, `build.sh`, `LICENSE`, README), commits como "Kestrion Dev Team"; el desarrollo sigue en este repo privado y se sincroniza con rsync.
+- **Landing** (`landing/index.html`, autocontenida, tema claro/oscuro): hero con mock visual de la app (quiz + cronómetro + progreso), cifras reales, 6 tarjetas de funciones, "cómo funciona", lista de módulos, FAQ y footer con disclaimer de marcas (Kubernetes®/CKA® de The Linux Foundation, proyecto independiente). Botón "Continuar donde lo dejaste" que aparece solo si el navegador ya tiene progreso. Hueco reservado en el footer para futuros banners/consultoría.
+- **Carga multi-fuente de módulos**: `modulos/index.json` (manifiesto generado por `cka-study-web/build-manifest.sh`) → listado de directorio local → TXT único. Tolerante a manifiestos desfasados (omite ficheros que falten), solo acepta el patrón `M##*.txt` (excluye `LICENSE.txt`) y descarta cualquier preámbulo anterior al primer `====` de cada fichero (los avisos de copyright no se cuelan en el contenido).
+- **`build.sh`** ensambla `dist/` para Cloudflare Pages: landing en la raíz, app en `/app/`, módulos con manifiesto regenerado. Build command: `bash build.sh`, output: `dist`. En local, `start.sh` regenera el manifiesto al arrancar.
+- **Licencia dual**: código MIT (`LICENSE`) y contenido del curso © Kestrion (`modulos/LICENSE.txt` + aviso al inicio de cada TXT de módulo). README raíz nuevo para el repo público con presentación y licencias.
+- **Verificación**: `dist/` servido en local — landing correcta en ambos temas (capturas headless), app en `/app/` cargando los 4 módulos vía índice, mismas 132 secciones (progreso intacto) y cero menciones del aviso de copyright en la interfaz.
+- **Estado**: ambos repos commiteados y pusheados (privado `63549c0`; público `f3a0739` + `2f54897`). Pendiente: conectar Cloudflare Pages y apuntar `kestrion.dev`.

@@ -35,7 +35,9 @@
       "Bash(curl -s http://127.0.0.1:8000/cka-study-web/)",
       "Bash(google-chrome --headless=new --disable-gpu --no-sandbox --virtual-time-budget=4000 --dump-dom \"http://127.0.0.1:8000/cka-study-web/\")",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(python3 -)",
+      "Bash(git -C /home/wolframio/Documents/kestrion-web status -sb)"
     ],
     "additionalDirectories": [
       "/home/wolframio/Documents/kestrion-web",

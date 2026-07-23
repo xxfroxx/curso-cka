@@ -244,6 +244,7 @@ Coste fijo total mientras tanto: **~12–25 €/año**. El riesgo económico es 
 #### Infraestructura e identidad (separación completa)
 - **Marca elegida**: `Kestrion` (nombre inventado, sin choques de mercado)
 - **Dominio**: `kestrion.dev` (Cloudflare Registrar, WHOIS privado activado, auto-renew configurado)
+  - **Decisión de estrategia de dominio (7 jul 2026)**: todo bajo `kestrion.dev`, sin dominios separados por producto. La autoridad SEO se acumula en el dominio raíz y beneficia a todo lo que cuelgue de él. Cuando llegue "Kestrion Consulting": consulting a la raíz y el curso a `kestrion.dev/cka/` (o `cka.kestrion.dev`) con redirecciones 301 — migración interna barata. Futuros productos siguen el patrón (`cks.kestrion.dev`, ...). Descartado comprar `kestrion-cka.dev`: cada dominio nuevo empieza de cero en SEO y no se prestan autoridad entre sí.
 - **Email maestro**: `kestrion@proton.me` (cuenta Proton independiente, separada de identidad personal)
 - **GitHub**: cuenta `kestrion-dev` creada, 2FA activado, email privado configurado (`300158305+kestrion-dev@users.noreply.github.com`)
 - **Repo público**: `kestrion-cka` en `https://github.com/kestrion-dev/kestrion-cka.git`

@@ -45,7 +45,14 @@
       "Bash(cd /home/wolframio/Documents/kestrion-web && cat .gitignore)",
       "Read(//home/wolframio/Documents/kestrion-web/**)",
       "Bash(curl -s https://kestrion.dev/)",
-      "Bash(curl -sv https://kestrion.dev/)"
+      "Bash(curl -sv https://kestrion.dev/)",
+      "Read(//home/wolframio/Documents/kestrion-web/cka-study-web/**)",
+      "Bash(pkill -f \"http.server 8006\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code} %{redirect_url}\\\\n' https://kestrion.dev/aviso-legal.html)",
+      "Bash(curl -sL -o /dev/null -w 'final: %{http_code} %{url_effective}\\\\n' https://kestrion.dev/aviso-legal.html)",
+      "Bash(sed -i 's|href=\"https://kestrion.dev/aviso-legal.html\"|href=\"https://kestrion.dev/aviso-legal\"|; s|href=\"./politica-privacidad.html\"|href=\"./politica-privacidad\"|' landing/aviso-legal.html)",
+      "Bash(sed -i 's|href=\"https://kestrion.dev/politica-privacidad.html\"|href=\"https://kestrion.dev/politica-privacidad\"|; s|href=\"./aviso-legal.html\"|href=\"./aviso-legal\"|' landing/politica-privacidad.html)",
+      "Bash(sed -i 's|href=\"./aviso-legal.html\"|href=\"./aviso-legal\"|; s|href=\"./politica-privacidad.html\"|href=\"./politica-privacidad\"|' landing/index.html)"
     ],
     "additionalDirectories": [
       "/home/wolframio/Documents/kestrion-web",

@@ -1,0 +1,311 @@
+TIPS PARA EL EXAMEN CKA
+=======================================
+
+Este fichero recoge trucos y procedimientos descubiertos
+durante la practica, para no depender de la memoria el
+dia del examen.
+
+
+TIP 1: DONDE BUSCAR AYUDA DURANTE EL EXAMEN
+---------------------------------------------
+
+En el examen real solo tienes UNA pestaña de navegador con
+acceso a:
+
+  kubernetes.io/docs
+  kubernetes.io/blog
+
+No hay copy-paste libre de internet ni otras webs. Por eso
+conviene memorizar el TITULO de las paginas clave, no el
+contenido:
+
+  "Operating etcd clusters for Kubernetes"
+    -> seccion "Backing up an etcd cluster"
+    -> seccion "Restoring an etcd cluster"
+
+Ahi esta el comando de snapshot save y de restore con
+placeholders, listos para copiar y adaptar.
+
+Ademas de la web, ten en cuenta que los binarios ya
+instalados en el nodo tienen su propia ayuda offline,
+que no depende de internet:
+
+  ETCDCTL_API=3 etcdctl snapshot save --help
+  ETCDCTL_API=3 etcdctl snapshot restore --help
+  kubectl explain <recurso>
+  kubectl <comando> --help
+
+Esta ayuda offline es mas rapida que buscar en la web
+cuando ya sabes mas o menos el comando y solo dudas de un
+flag concreto.
+
+
+TIP 2: ETCDCTL_API=3
+---------------------------------------------
+
+etcdctl soporta dos versiones de API (v2 antigua, v3 actual).
+En muchas instalaciones el binario aun trae v2 como default.
+Sin la variable, comandos como "snapshot save" pueden no
+existir o comportarse distinto.
+
+Ponla siempre al principio de la sesion para no tener que
+repetirla en cada comando:
+
+  export ETCDCTL_API=3
+
+
+TIP 3: COMO SACAR LOS FLAGS DE RESTORE DEL MANIFEST
+---------------------------------------------
+
+No hay que memorizar IPs ni nombres de nodo: se sacan en
+vivo del propio manifest de etcd que ya esta corriendo.
+
+  sudo grep -E -- "--name=|--initial-cluster=|--initial-advertise-peer-urls=" \
+    /etc/kubernetes/manifests/etcd.yaml
+
+Que buscar y por que (los 3 flags que SIEMPRE hacen falta
+para que el restore "encaje" con lo que el manifest espera):
+
+  --name                        Identidad del miembro de etcd
+                                 en este nodo.
+
+  --initial-cluster              Nombre=peer-url del propio
+                                 nodo (en un cluster de un
+                                 solo control-plane, solo hay
+                                 una entrada).
+
+  --initial-advertise-peer-urls  La URL por la que este etcd
+                                 se anuncia a otros miembros.
+                                 Coincide con la parte derecha
+                                 de --initial-cluster.
+
+El cuarto flag necesario NO se saca del manifest, se
+inventa (cualquier string fijo sirve, no tiene que coincidir
+con nada previo):
+
+  --initial-cluster-token=etcd-cluster-1
+
+Por que hacen falta: el restore recalcula el ID del cluster
+y el ID del miembro local a partir de estos 4 valores. Si no
+coinciden con lo que el manifest espera, etcd arranca con una
+identidad distinta y no logra reconciliar, quedando en un
+loop de crash (visto en la practica: panic "failed to update;
+member unknown").
+
+
+TIP 4: PROCEDIMIENTO COMPLETO DE RESTORE (6 PASOS)
+---------------------------------------------
+
+  1. Frena el static pod (kubelet lo detecta y lo borra):
+       sudo mv /etc/kubernetes/manifests/etcd.yaml /tmp/etcd.yaml
+
+  2. Restore a una carpeta NUEVA, nunca sobre /var/lib/etcd
+     directamente (evita mezclar datos de intentos previos):
+       sudo ETCDCTL_API=3 etcdctl snapshot restore <snapshot.db> \
+         --data-dir=/var/lib/etcd-restored \
+         --name=<del-grep> \
+         --initial-cluster=<del-grep> \
+         --initial-advertise-peer-urls=<del-grep> \
+         --initial-cluster-token=etcd-cluster-1
+
+  3. Saca lo viejo:
+       sudo mv /var/lib/etcd /var/lib/etcd-old
+
+  4. Entra lo nuevo:
+       sudo mv /var/lib/etcd-restored /var/lib/etcd
+
+  5. Reactiva el static pod:
+       sudo mv /tmp/etcd.yaml /etc/kubernetes/manifests/etcd.yaml
+
+  6. Verifica (usar comillas para que el pipe funcione DENTRO
+     de watch, si no "watch | grep" no filtra nada util):
+       watch -n1 "sudo crictl ps -a | grep etcd"
+
+
+TIP 5: DOS CAs DISTINTAS EN /etc/kubernetes/pki/
+---------------------------------------------
+
+No hay una sola CA en el cluster. Hay minimo dos, separadas
+a proposito (defensa en profundidad, un compromiso de una no
+compromete la otra):
+
+  /etc/kubernetes/pki/ca.crt         -> CA principal del
+                                         cluster (firma
+                                         apiserver, kubelet-
+                                         client, etc.)
+
+  /etc/kubernetes/pki/etcd/ca.crt    -> CA propia de etcd
+                                         (firma etcd/server.crt,
+                                         etcd/peer.crt, etc.)
+
+Para hablar con etcd via etcdctl, los 3 certs van SIEMPRE
+dentro de la carpeta etcd/, nunca mezclados con la CA
+principal:
+
+  --cacert /etc/kubernetes/pki/etcd/ca.crt
+  --cert   /etc/kubernetes/pki/etcd/server.crt
+  --key    /etc/kubernetes/pki/etcd/server.key
+
+Si aparece "x509: certificate signed by unknown authority"
+al hacer snapshot save/restore, revisar primero si se mezclo
+la CA principal con los certs de etcd.
+
+
+TIP 6: VERIFICAR EL SNAPSHOT ANTES DE DAR EL ITEM POR HECHO
+---------------------------------------------
+
+  ETCDCTL_API=3 etcdctl --write-out=table snapshot status <archivo>
+
+Confirma hash, revision, total keys y tamaño. Tambien sirve
+para comprobar que el NOMBRE del archivo quedo como se
+pedia (revisar con "ls" antes de dar por bueno un backup,
+un copy-paste sin espacio puede dejar el nombre pegado a
+otro texto sin que se note a simple vista).
+
+
+TIP 7 (fuera de examen, troubleshooting general):
+REINICIAR CALICO/COREDNS TRAS UN RESTORE DE ETCD
+---------------------------------------------
+
+No es materia del CKA, pero vale la pena entenderlo:
+
+Cuando se restaura etcd a un punto anterior en el tiempo,
+el "resourceVersion" (indice interno que sube siempre)
+retrocede. Cualquier proceso que ya tenia en memoria un
+watch con una version MAS ALTA que la nueva realidad queda
+atascado reintentando contra una version que ya no existe.
+
+Sintoma en logs de calico-node:
+
+  error=Timeout: Too large resource version: 382635, current: 222207
+
+Esto bloquea la asignacion de IP a pods nuevos (se quedan en
+Pending indefinidamente).
+
+Arreglo: forzar que esos componentes abran un watch nuevo
+desde cero, sin el bookmark viejo en memoria:
+
+  kubectl rollout restart daemonset calico-node -n kube-system
+  kubectl rollout restart deployment calico-kube-controllers -n kube-system
+  kubectl rollout restart deployment coredns -n kube-system
+
+Regla general: tras cualquier restore de etcd en produccion,
+revisar (o reiniciar preventivamente) los componentes del
+control plane y del CNI, no solo etcd/apiserver.
+
+
+TIP 8: crictl SOLO VE EL NODO LOCAL
+---------------------------------------------
+
+kubectl habla con el apiserver (funciona desde cualquier
+nodo con kubeconfig valido). crictl y journalctl -u kubelet
+hablan con el runtime/kubelet LOCAL de la maquina donde se
+ejecutan.
+
+Si un pod esta en otro nodo (revisar con
+"kubectl get pod -o wide"), hay que hacer ssh a ESE nodo
+para poder ver sus contenedores con crictl.
+
+
+TIP 9: NO REVERTIR SNAPSHOTS DE VM A MEDIAS
+---------------------------------------------
+
+Si el lab corre en VMs con snapshot de hipervisor: revertir
+SOLO el control-plane y dejar los workers en su estado
+actual rompe el cluster de forma no recuperable con
+troubleshooting normal (certificados, reloj y resourceVersion
+quedan desincronizados entre nodos). Si se revierte un
+snapshot de VM, hay que revertir TODOS los nodos al mismo
+punto en el tiempo.
+
+
+TIP 10: "kubeadm upgrade plan" MUESTRA VARIAS RUTAS, ELIGES UNA
+---------------------------------------------
+
+Si el binario de kubeadm instalado es de una minor mas nueva
+que el cluster, el plan ofrece 2 bloques separados (no hay
+que aplicar los dos):
+
+  A) misma minor, ultimo patch  -> kubeadm upgrade apply 1.35.8
+  B) siguiente minor, con el kubeadm ya instalado
+                                 -> kubeadm upgrade apply 1.36.4
+
+Regla: nunca saltar mas de 1 minor de golpe (1.34->1.36
+directo, prohibido). 1.35->1.36 si vale, es un solo salto.
+
+El techo de lo que el plan puede ofrecer lo pone la version
+del binario de kubeadm instalado, no lo ultimo que exista
+en internet (log tipico: "remote version is much newer:
+vX.Y; falling back to: stable-X.Y-1").
+
+
+TIP 11: DRAIN EN EL UPGRADE (CP Y WORKERS)
+---------------------------------------------
+
+Orden correcto por nodo: apply/node -> drain -> actualizar
+paquete kubelet/kubectl -> restart kubelet -> uncordon.
+
+  kubectl drain <nodo> --ignore-daemonsets
+
+--ignore-daemonsets es obligatorio (si no, falla por
+kube-proxy/calico-node). Si hay emptyDir, puede pedir
+tambien --delete-emptydir-data.
+
+
+TIP 12: CAMBIAR DE REPO APT AL SUBIR DE MINOR
+---------------------------------------------
+
+Cada minor tiene su propio repo en pkgs.k8s.io. Antes de
+tocar nada, comprobar si ya esta disponible:
+
+  apt-cache madison kubeadm
+
+Si no aparece la minor destino, cambiar repo Y clave (las
+dos, si solo cambias la URL falla la firma):
+
+  curl -fsSL https://pkgs.k8s.io/core:/stable:/v1.36/deb/Release.key | \
+    sudo gpg --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg
+
+  echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.36/deb/ /' | \
+    sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+  sudo apt-get update
+
+
+TIP 13: RoleBinding SIN -n = namespace equivocado
+---------------------------------------------
+
+RoleBinding debe crearse SIEMPRE con -n <mismo-ns-del-Role>.
+Sin el flag cae en el namespace default del contexto, y el
+authorizer no encuentra el Role -> "role ... not found" en
+auth can-i, aunque el Role si exista (en otro ns).
+
+
+TIP 14: "create role" con 2+ resources = mismos verbs para todos
+---------------------------------------------
+
+  k create role X --verb=a,b --resource=r1,r2
+
+Da los mismos verbs a r1 Y r2 (una sola regla). Si cada
+resource necesita verbs distintos, no se puede en un solo
+comando: hay que generar YAML y agregar una 2a regla.
+
+
+TIP 15: EDITAR ROLES/YAML EN VIM SIN LIARLA
+---------------------------------------------
+
+Para copiar/pegar bloques en vim: Shift+v (visual de LINEA),
+no Ctrl+v (visual de BLOQUE, solo copia columnas, corta
+texto a la derecha como los ":").
+
+Para agregar una regla nueva a un Role: NO usar heredoc
+(cat <<EOF) en el examen -> si te equivocas a mitad, se
+pierde todo el bloque. Mejor:
+
+  k create role X --verb=... --resource=... -n ns \
+    --dry-run=client -o yaml > role.yaml
+  vim role.yaml        (teclear la regla nueva, no pegar)
+  k apply -f role.yaml
+
+Con archivo local puedes corregir con "u" (undo) y reaplicar,
+sin perder todo si hay un error de sintaxis.

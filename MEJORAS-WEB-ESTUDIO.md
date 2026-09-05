@@ -202,3 +202,18 @@ Líneas anteriores a la corrección:
 - Push privado: bloqueado por credenciales de `xxfroxx`.
 - Commit público: `d37afd3`.
 - Repo público: sincronizado y publicado.
+
+### 2026-09-05 — SEO: páginas de módulo indexables
+
+- Modelo: Claude Sonnet 5. Origen: `AUDITORIA-SEO.md` (0 tráfico orgánico; Google solo indexa `/` y `/app/`).
+- Decisión SEO-004: `/app/` pasa a `noindex,follow`. Deja de estar en el sitemap.
+- Numeración de módulos: se mantiene M00–M04 (no renombrar), pendiente para cuando se generen páginas de nuevos dominios.
+- Nuevo `cka-study-web/render.js`: extrae el render puro de `app.js` (antes inline), con flag `staticMode` (quiz/spoiler siempre abiertos, sin botones que dependan de JS). Reutilizable en Node vía `module.exports`. `parser.js` también exporta a Node ahora.
+- `app.js` refactorizado para usar `render.js` (mismo comportamiento, sin cambios de UX).
+- Nuevo `cka-study-web/build-pages.js`: genera `dist/modulos/<slug>/index.html` por módulo (contenido íntegro sin JS, canonical, OG/Twitter, `rel=prev/next`, `BreadcrumbList`) y `dist/sitemap.xml` (7 URLs: home + 6 módulos, sin `/app/`). Aborta el build si la lista interna se desincroniza de `modulos/index.json`.
+- Slugs: `entorno-kubectl`, `arquitectura-kubernetes`, `kubeadm-instalacion-upgrade-etcd`, `rbac-seguridad-kubernetes`, `helm-kustomize-crds`, `deployments-daemonsets-statefulsets`.
+- `build.sh` invoca `build-pages.js`; ya no copia `landing/sitemap.xml` (se genera).
+- `landing/index.html`: los 6 módulos enlazan a su página; línea de estado/cobertura (Kubernetes v1.35, 40% del temario cubierto — Cluster Architecture + Workloads & Scheduling); FAQ "¿actualizado?" corregida; meta description/OG/Twitter recortadas a ~150-155 caracteres.
+- Verificado: `node --check` en los 3 JS, sin colisión de identificadores globales entre `render.js`/`app.js`, `bash build.sh` sin error, JSON-LD (BreadcrumbList y FAQPage) parseado OK, tags balanceados en las 6 páginas y en la landing.
+- Sin verificar: interacción real en navegador (quiz/spoiler/copiar/cronómetro en `/app/`) — este entorno no tiene `chromium-cli` ni Node ≥20 para Playwright. Pendiente pasada manual con `cka-study-web/start.sh`.
+- Sin commit, sin push. Publicación en `kestrion-web` pendiente de aprobación aparte (ver `[[kestrion-publicacion]]`).

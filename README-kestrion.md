@@ -1,9 +1,5 @@
 # Kestrion — Preparación CKA en español
 
-Web de estudio interactiva y gratuita para el examen **CKA (Certified Kubernetes Administrator)**, en español.
-
-**➡️ Estudia en [kestrion.dev](https://kestrion.dev)** — sin registro, directamente en el navegador.
-
 ## Por qué existe
 
 El CKA es un examen 100 % práctico y contra el reloj. Leer PDFs no entrena eso. Kestrion convierte el material de estudio en una herramienta de entrenamiento:

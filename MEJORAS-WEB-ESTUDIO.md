@@ -198,5 +198,7 @@ Líneas anteriores a la corrección:
 - Placeholders eliminados de todos los bloques `exec`.
 - M04 añadido a `modulos/index.json`.
 - Parser: cero bloques `legacy` en M00–M04.
-- Commit privado: pendiente.
-- Sincronización pública: pendiente.
+- Commit técnico privado: `d6df9e7`.
+- Push privado: bloqueado por credenciales de `xxfroxx`.
+- Commit público: `d37afd3`.
+- Repo público: sincronizado y publicado.
